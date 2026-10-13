@@ -1,0 +1,82 @@
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+int main()
+{
+    char target[100];
+    char command[300];
+
+    printf("========================================\n");
+    printf(" OS DETECTION AND SERVICE VERSION SCAN\n");
+    printf("========================================\n");
+
+    printf("Enter target IP address: ");
+
+    if (scanf("%99s", target) != 1)
+    {
+        printf("Invalid input.\n");
+        return 1;
+    }
+
+    /* Validate IP address characters */
+    for (int i = 0; target[i] != '\0'; i++)
+    {
+        if (!isdigit((unsigned char)target[i]) &&
+            target[i] != '.')
+        {
+            printf("Please enter a valid IPv4 address.\n");
+            return 1;
+        }
+    }
+
+    /* Run Nmap OS and service version detection */
+    snprintf(command, sizeof(command),
+             "nmap -O -sV -oN os_detection_results.txt %s",
+             target);
+
+    printf("\nScanning target: %s\n", target);
+    printf("Detecting operating system and service versions...\n\n");
+
+    int status = system(command);
+
+    if (status != 0)
+    {
+        printf("\nScan failed. Check Nmap installation, "
+               "permissions, and target address.\n");
+        return 1;
+    }
+
+    printf("\n========================================\n");
+    printf("          SCAN COMPLETED\n");
+    printf("========================================\n");
+
+    printf("\nResults saved in os_detection_results.txt\n");
+
+    printf("\n========== SCAN REPORT ==========\n");
+
+    FILE *fp = fopen("os_detection_results.txt", "r");
+
+    if (fp == NULL)
+    {
+        printf("Unable to open the results file.\n");
+        return 1;
+    }
+
+    char line[512];
+
+    while (fgets(line, sizeof(line), fp) != NULL)
+    {
+        printf("%s", line);
+    }
+
+    fclose(fp);
+
+    printf("\n========================================\n");
+    printf("Analysis complete.\n");
+
+    return 0;
+}
+```
